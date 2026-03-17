@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>GansonStreet Admin</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#080c14;color:#e8edf5;line-height:1.6}
+.gs-shell{display:flex;min-height:100vh}
+.gs-sidebar{width:220px;background:#0d1220;border-right:1px solid #1a2540;position:fixed;top:0;left:0;height:100vh;display:flex;flex-direction:column;z-index:100}
+.gs-main{margin-left:220px;flex:1;padding:2rem}
+.gs-logo{padding:1.2rem 1.5rem;border-bottom:1px solid #1a2540}
+.gs-logo-text{font-size:1.1rem;font-weight:800;color:#fff}.gs-logo-text span{color:#4f8ef7}
+.gs-logo-sub{font-size:.7rem;color:#3a4a6a;letter-spacing:1px;text-transform:uppercase}
+.gs-nav{flex:1;padding:1rem 0}
+.gs-nav-section{font-size:.65rem;letter-spacing:2px;text-transform:uppercase;color:#2a3a5a;padding:.5rem 1.5rem;margin-top:.5rem}
+.gs-nav-item{display:flex;align-items:center;gap:.6rem;padding:.6rem 1.5rem;font-size:.88rem;color:#5a6a8a;cursor:pointer;transition:all .2s;border-left:2px solid transparent}
+.gs-nav-item:hover{color:#e8edf5;background:rgba(79,142,247,.05)}
+.gs-nav-item.active{color:#4f8ef7;border-left-color:#4f8ef7;background:rgba(79,142,247,.08)}
+.gs-sidebar-footer{padding:1rem 1.5rem;border-top:1px solid #1a2540;font-size:.75rem;color:#2a3a5a;display:flex;justify-content:space-between;align-items:center}
+.gs-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem}
+.gs-page-title{font-size:1.4rem;font-weight:700;color:#fff}
+.gs-page-sub{font-size:.82rem;color:#4a5a7a;margin-top:.2rem}
+.gs-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:2rem}
+.gs-stat{background:#0d1420;border:1px solid #1a2540;border-radius:10px;padding:1.2rem}
+.gs-stat-num{font-size:1.8rem;font-weight:800;color:#4f8ef7}
+.gs-stat-label{font-size:.72rem;color:#4a5a7a;text-transform:uppercase;letter-spacing:1px;margin-top:.2rem}
+.gs-card{background:#0d1420;border:1px solid #1a2540;border-radius:12px;margin-bottom:1.5rem}
+.gs-card-head{padding:1rem 1.25rem;border-bottom:1px solid #1a2540;display:flex;justify-content:space-between;align-items:center}
+.gs-card-title{font-size:.95rem;font-weight:600;color:#c8d8f0}
+.gs-card-body{padding:1.25rem}
+.gs-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.gs-table th{text-align:left;padding:.6rem 1rem;font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:#3a4a6a;border-bottom:1px solid #1a2540}
+.gs-table td{padding:.7rem 1rem;border-bottom:1px solid #0f1828;color:#8899bb;vertical-align:middle}
+.gs-table tr:last-child td{border-bottom:none}
+.gs-table tr:hover td{background:rgba(79,142,247,.03);color:#c8d8f0}
+.badge{display:inline-block;padding:.2rem .6rem;border-radius:4px;font-size:.7rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+.badge-ai{background:rgba(127,119,221,.15);color:#afa9ec}
+.badge-sms{background:rgba(201,147,74,.15);color:#c9934a}
+.badge-crm{background:rgba(79,142,247,.15);color:#85b7eb}
+.badge-payment{background:rgba(29,158,117,.15);color:#5dcaa5}
+.badge-database{background:rgba(99,153,34,.15);color:#97c459}
+.badge-email{background:rgba(216,90,48,.15);color:#f0997b}
+.badge-erp{background:rgba(212,83,126,.15);color:#ed93b1}
+.badge-social{background:rgba(24,95,165,.15);color:#85b7eb}
+.badge-workflow{background:rgba(186,117,23,.15);color:#ef9f27}
+.badge-pos{background:rgba(93,202,165,.15);color:#5dcaa5}
+.badge-maps{background:rgba(226,75,74,.15);color:#f09595}
+.badge-active{background:rgba(29,158,117,.15);color:#5dcaa5}
+.badge-inactive{background:rgba(163,45,45,.15);color:#f09595}
+.badge-chat{background:rgba(79,142,247,.15);color:#85b7eb}
+.badge-system{background:rgba(127,119,221,.15);color:#afa9ec}
+.badge-starter{background:rgba(79,142,247,.1);color:#85b7eb}
+.badge-growth{background:rgba(29,158,117,.1);color:#5dcaa5}
+.badge-custom{background:rgba(186,117,23,.1);color:#ef9f27}
+.badge-enterprise{background:rgba(127,119,221,.1);color:#afa9ec}
+.badge-restaurant{background:rgba(201,147,74,.15);color:#c9934a}
+.badge-parking{background:rgba(29,158,117,.15);color:#5dcaa5}
+.badge-healthcare{background:rgba(212,83,126,.15);color:#ed93b1}
+.badge-retail{background:rgba(79,142,247,.15);color:#85b7eb}
+.badge-other{background:rgba(136,135,128,.15);color:#b4b2a9}
+.badge-production{background:rgba(29,158,117,.15);color:#5dcaa5}
+.badge-staging{background:rgba(186,117,23,.15);color:#ef9f27}
+.badge-test{background:rgba(136,135,128,.15);color:#b4b2a9}
+.btn{padding:.55rem 1.1rem;border-radius:6px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;border:none}
+.btn-primary{background:#4f8ef7;color:#fff}.btn-primary:hover{background:#6ba3f9}
+.btn-outline{background:transparent;border:1px solid #2a3a5a;color:#8899bb}.btn-outline:hover{border-color:#4f8ef7;color:#fff}
+.btn-danger{background:transparent;border:1px solid #a32d2d;color:#e24b4a}.btn-danger:hover{background:#a32d2d;color:#fff}
+.btn-sm{padding:.35rem .75rem;font-size:.78rem}
+.gs-tabs{display:flex;gap:0;border-bottom:1px solid #1a2540;margin-bottom:1.5rem}
+.gs-tab{padding:.7rem 1.2rem;font-size:.85rem;color:#4a5a7a;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s}
+.gs-tab:hover{color:#e8edf5}.gs-tab.active{color:#4f8ef7;border-bottom-color:#4f8ef7}
+.gs-modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:center;justify-content:center}
+.gs-modal-bg.open{display:flex}
+.gs-modal{background:#0d1420;border:1px solid #1a2540;border-radius:14px;width:540px;max-width:92vw;max-height:88vh;overflow-y:auto}
+.gs-modal-head{padding:1.2rem 1.5rem;border-bottom:1px solid #1a2540;display:flex;justify-content:space-between;align-items:center}
+.gs-modal-head h3{font-size:1rem;font-weight:700}
+.gs-modal-close{background:none;border:none;color:#4a5a7a;cursor:pointer;font-size:1.2rem}
+.gs-modal-body{padding:1.5rem}
+.gs-modal-foot{padding:1rem 1.5rem;border-top:1px solid #1a2540;display:flex;justify-content:flex-end;gap:.75rem}
+.fg{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem}
+.fg label{font-size:.75rem;letter-spacing:1px;text-transform:uppercase;color:#4a5a7a}
+.fg input,.fg select,.fg textarea{background:#080c14;border:1px solid #1a2540;border-radius:6px;padding:.6rem .8rem;color:#e8edf5;font-size:.88rem;outline:none;transition:border-color .2s;font-family:inherit;width:100%}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:#4f8ef7}
+.fg select option{background:#0d1420}
+.fg textarea{resize:vertical;min-height:80px}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.gs-empty{text-align:center;padding:3rem;color:#3a4a6a}
+.gs-empty-icon{font-size:2rem;margin-bottom:.5rem}
+.gs-page{display:none}.gs-page.active{display:block}
+.cred-mask{font-family:monospace;font-size:.8rem;color:#4a5a7a;letter-spacing:2px}
+.hint{font-size:.75rem;color:#3a4a6a;margin-top:.3rem}
+</style>
+</head>
+<body>
+<div class="gs-shell">
+<div class="gs-sidebar">
+  <div class="gs-logo">
+    <div class="gs-logo-text">Ganson<span>Street</span></div>
+    <div class="gs-logo-sub">Admin Console</div>
+  </div>
+  <nav class="gs-nav">
+    <div class="gs-nav-section">Overview</div>
+    <div class="gs-nav-item active" onclick="showPage('dashboard',this)">⬡ Dashboard</div>
+    <div class="gs-nav-section">Platform</div>
+    <div class="gs-nav-item" onclick="showPage('clients',this)">🏢 Clients</div>
+    <div class="gs-nav-item" onclick="showPage('services',this)">🔌 Services</div>
+    <div class="gs-nav-item" onclick="showPage('credentials',this)">🔑 Credentials</div>
+    <div class="gs-nav-item" onclick="showPage('agents',this)">🤖 Agents</div>
+    <div class="gs-nav-item" onclick="showPage('workflows',this)">⚡ Workflows</div>
+    <div class="gs-nav-section">Monitoring</div>
+    <div class="gs-nav-item" onclick="showPage('audit',this)">📋 Audit Log</div>
+    <div class="gs-nav-item" onclick="showPage('subscribers',this)">📱 SMS Subscribers</div>
+  </nav>
+  <div class="gs-sidebar-footer">
+    <span>v1.0</span>
+    <button class="btn btn-outline btn-sm" onclick="logout()">Sign out</button>
+  </div>
+</div>
+
+<div class="gs-main">
+
+  <!-- DASHBOARD -->
+  <div class="gs-page active" id="page-dashboard">
+    <div class="gs-header"><div><div class="gs-page-title">Dashboard</div><div class="gs-page-sub">GansonStreet platform overview</div></div></div>
+    <div class="gs-stats">
+      <div class="gs-stat"><div class="gs-stat-num" id="stat-clients">—</div><div class="gs-stat-label">Clients</div></div>
+      <div class="gs-stat"><div class="gs-stat-num" id="stat-services">—</div><div class="gs-stat-label">Services</div></div>
+      <div class="gs-stat"><div class="gs-stat-num" id="stat-agents">—</div><div class="gs-stat-label">Agents</div></div>
+      <div class="gs-stat"><div class="gs-stat-num" id="stat-creds">—</div><div class="gs-stat-label">Credentials</div></div>
+      <div class="gs-stat"><div class="gs-stat-num" id="stat-workflows">—</div><div class="gs-stat-label">Workflows</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+      <div class="gs-card">
+        <div class="gs-card-head"><span class="gs-card-title">Clients</span><button class="btn btn-primary btn-sm" onclick="showPage('clients',null)">View all</button></div>
+        <div class="gs-card-body"><table class="gs-table"><thead><tr><th>Name</th><th>Industry</th><th>Plan</th></tr></thead><tbody id="dash-clients"></tbody></table></div>
+      </div>
+      <div class="gs-card">
+        <div class="gs-card-head"><span class="gs-card-title">Services</span><button class="btn btn-outline btn-sm" onclick="showPage('services',null)">View all</button></div>
+        <div class="gs-card-body"><table class="gs-table"><thead><tr><th>Service</th><th>Category</th><th>Auth</th></tr></thead><tbody id="dash-services"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLIENTS -->
+  <div class="gs-page" id="page-clients">
+    <div class="gs-header"><div><div class="gs-page-title">Clients</div><div class="gs-page-sub">All GansonStreet clients</div></div><button class="btn btn-primary" onclick="openAddClient()">+ Add Client</button></div>
+    <div class="gs-card"><div class="gs-card-body">
+      <table class="gs-table"><thead><tr><th>Name</th><th>Domain</th><th>Industry</th><th>Plan</th><th>Status</th><th>Actions</th></tr></thead><tbody id="clients-table"></tbody></table>
+    </div></div>
+  </div>
+
+  <!-- SERVICES -->
+  <div class="gs-page" id="page-services">
+    <div class="gs-header"><div><div class="gs-page-title">Services Registry</div><div class="gs-page-sub">All integrated platforms and APIs</div></div><button class="btn btn-primary" onclick="openModal('modal-service')">+ Add Service</button></div>
+    <div class="gs-tabs">
+      <div class="gs-tab active" onclick="filterSvc('all',this)">All</div>
+      <div class="gs-tab" onclick="filterSvc('ai',this)">AI</div>
+      <div class="gs-tab" onclick="filterSvc('sms',this)">SMS</div>
+      <div class="gs-tab" onclick="filterSvc('crm',this)">CRM</div>
+      <div class="gs-tab" onclick="filterSvc('payment',this)">Payment</div>
+      <div class="gs-tab" onclick="filterSvc('erp',this)">ERP</div>
+      <div class="gs-tab" onclick="filterSvc('email',this)">Email</div>
+      <div class="gs-tab" onclick="filterSvc('database',this)">Database</div>
+    </div>
+    <div class="gs-card"><div class="gs-card-body">
+      <table class="gs-table"><thead><tr><th>Service</th><th>Category</th><th>Auth Type</th><th>Base URL</th><th>Docs</th><th>Status</th></tr></thead><tbody id="services-table"></tbody></table>
+    </div></div>
+  </div>
+
+  <!-- CREDENTIALS -->
+  <div class="gs-page" id="page-credentials">
+    <div class="gs-header"><div><div class="gs-page-title">Credentials Vault</div><div class="gs-page-sub">API keys and secrets per client per service</div></div><button class="btn btn-primary" onclick="openAddCred()">+ Add Credential</button></div>
+    <div class="gs-tabs">
+      <div class="gs-tab active" onclick="filterCreds('all',this)">All</div>
+      <div id="cred-client-tabs"></div>
+    </div>
+    <div class="gs-card"><div class="gs-card-body">
+      <table class="gs-table"><thead><tr><th>Client</th><th>Service</th><th>Key Name</th><th>Value</th><th>Description</th><th>Env</th><th>Status</th><th>Actions</th></tr></thead><tbody id="creds-table"></tbody></table>
+    </div></div>
+  </div>
+
+  <!-- AGENTS -->
+  <div class="gs-page" id="page-agents">
+    <div class="gs-header"><div><div class="gs-page-title">Agents</div><div class="gs-page-sub">Specialist AI agents</div></div><button class="btn btn-primary" onclick="openAddAgent()">+ Add Agent</button></div>
+    <div class="gs-card"><div class="gs-card-body">
+      <table class="gs-table"><thead><tr><th>Agent</th><th>Slug</th><th>Category</th><th>Model</th><th>Description</th><th>Status</th><th>Actions</th></tr></thead><tbody id="agents-table"></tbody></table>
+    </div></div>
+  </div>
+
+  <!-- WORKFLOWS -->
+  <div class="gs-page" id="page-workflows">
+    <div class="gs-header"><div><div class="gs-page-title">Workflows</div><div class="gs-page-sub">Multi-step automation sequences</div></div><button class="btn btn-primary" onclick="openAddWorkflow()">+ Add Workflow</button></div>
+    <div class="gs-card"><div class="gs-card-body"><table class="gs-table"><thead><tr><th>Client</th><th>Name</th><th>Trigger</th><th>Description</th><th>Status</th><th>Actions</th></tr></thead><tbody id="workflows-table"></tbody></table></div></div>
+  </div>
+
+  <!-- AUDIT -->
+  <div class="gs-page" id="page-audit">
+    <div class="gs-header"><div><div class="gs-page-title">Audit Log</div><div class="gs-page-sub">Every action tracked</div></div></div>
+    <div class="gs-card"><div class="gs-card-body"><div class="gs-empty"><div class="gs-empty-icon">📋</div><p>No events logged yet</p></div></div></div>
+  </div>
+
+  <!-- SUBSCRIBERS -->
+  <div class="gs-page" id="page-subscribers">
+    <div class="gs-header"><div><div class="gs-page-title">SMS Subscribers</div><div class="gs-page-sub">Opt-in list per client</div></div></div>
+    <div class="gs-card"><div class="gs-card-body"><div class="gs-empty"><div class="gs-empty-icon">📱</div><p>No subscribers yet</p></div></div></div>
+  </div>
+
+</div>
+</div>
+
+<!-- CLIENT MODAL -->
+<div class="gs-modal-bg" id="modal-client">
+  <div class="gs-modal">
+    <div class="gs-modal-head"><h3 id="client-modal-title">Add Client</h3><button class="gs-modal-close" onclick="closeModal('modal-client')">✕</button></div>
+    <div class="gs-modal-body">
+      <input type="hidden" id="c-id"/>
+      <div class="fr"><div class="fg"><label>Business Name</label><input id="c-name" placeholder="Mario's Bistro"/></div><div class="fg"><label>Domain</label><input id="c-domain" placeholder="mariobistrobrews.com"/></div></div>
+      <div class="fr"><div class="fg"><label>Industry</label><select id="c-industry"><option value="restaurant">Restaurant</option><option value="parking">Parking</option><option value="healthcare">Healthcare</option><option value="retail">Retail</option><option value="property">Property</option><option value="logistics">Logistics</option><option value="other">Other</option></select></div><div class="fg"><label>Plan</label><select id="c-plan"><option value="starter">Starter</option><option value="growth">Growth</option><option value="custom">Custom</option><option value="enterprise">Enterprise</option></select></div></div>
+      <div class="fr"><div class="fg"><label>Contact Name</label><input id="c-contact" placeholder="Mario Rossi"/></div><div class="fg"><label>Contact Phone</label><input id="c-phone" placeholder="7167408080"/></div></div>
+      <div class="fg"><label>Contact Email</label><input id="c-email" type="email" placeholder="mario@bistro.com"/></div>
+      <div class="fg"><label>Notes</label><textarea id="c-notes" placeholder="Notes..."></textarea></div>
+    </div>
+    <div class="gs-modal-foot"><button class="btn btn-outline" onclick="closeModal('modal-client')">Cancel</button><button class="btn btn-primary" id="client-save-btn" onclick="saveClient()">Add Client</button></div>
+  </div>
+</div>
+
+<!-- CREDENTIAL MODAL -->
+<div class="gs-modal-bg" id="modal-cred">
+  <div class="gs-modal">
+    <div class="gs-modal-head"><h3>Add Credential</h3><button class="gs-modal-close" onclick="closeModal('modal-cred')">✕</button></div>
+    <div class="gs-modal-body">
+      <div class="fr"><div class="fg"><label>Client</label><select id="cr-client"><option value="">Select client...</option></select></div><div class="fg"><label>Service</label><select id="cr-service"><option value="">Select service...</option></select></div></div>
+      <div class="fr"><div class="fg"><label>Key Name</label><input id="cr-name" placeholder="ANTHROPIC_API_KEY"/></div><div class="fg"><label>Environment</label><select id="cr-env"><option value="production">Production</option><option value="staging">Staging</option><option value="test">Test</option></select></div></div>
+      <div class="fg"><label>Key Value</label><input id="cr-value" type="password" placeholder="sk-ant-..."/><div class="hint">Value is stored securely and masked in the UI</div></div>
+      <div class="fg"><label>Description</label><input id="cr-desc" placeholder="Production key — March 2026"/></div>
+    </div>
+    <div class="gs-modal-foot"><button class="btn btn-outline" onclick="closeModal('modal-cred')">Cancel</button><button class="btn btn-primary" onclick="saveCredential()">Save Credential</button></div>
+  </div>
+</div>
+
+<!-- SERVICE MODAL -->
+<div class="gs-modal-bg" id="modal-service">
+  <div class="gs-modal">
+    <div class="gs-modal-head"><h3>Add Service</h3><button class="gs-modal-close" onclick="closeModal('modal-service')">✕</button></div>
+    <div class="gs-modal-body">
+      <div class="fr"><div class="fg"><label>Service Name</label><input id="s-name" placeholder="Salesforce"/></div><div class="fg"><label>Slug</label><input id="s-slug" placeholder="salesforce"/></div></div>
+      <div class="fr"><div class="fg"><label>Category</label><select id="s-cat"><option value="ai">AI</option><option value="sms">SMS</option><option value="crm">CRM</option><option value="payment">Payment</option><option value="erp">ERP</option><option value="database">Database</option><option value="email">Email</option><option value="social">Social</option><option value="workflow">Workflow</option><option value="pos">POS</option><option value="maps">Maps</option><option value="storage">Storage</option><option value="analytics">Analytics</option><option value="other">Other</option></select></div><div class="fg"><label>Auth Type</label><select id="s-auth"><option value="api_key">API Key</option><option value="oauth">OAuth</option><option value="bearer">Bearer</option><option value="basic">Basic Auth</option><option value="webhook_secret">Webhook Secret</option><option value="none">None</option></select></div></div>
+      <div class="fg"><label>Base URL</label><input id="s-url" placeholder="https://api.salesforce.com"/></div>
+      <div class="fg"><label>Docs URL</label><input id="s-docs" placeholder="https://developer.salesforce.com"/></div>
+      <div class="fg"><label>Description</label><textarea id="s-desc" placeholder="What does this service do?"></textarea></div>
+    </div>
+    <div class="gs-modal-foot"><button class="btn btn-outline" onclick="closeModal('modal-service')">Cancel</button><button class="btn btn-primary" onclick="saveService()">Add Service</button></div>
+  </div>
+</div>
+
+<!-- AGENT MODAL -->
+<div class="gs-modal-bg" id="modal-agent">
+  <div class="gs-modal">
+    <div class="gs-modal-head"><h3 id="agent-modal-title">Add Agent</h3><button class="gs-modal-close" onclick="closeModal('modal-agent')">✕</button></div>
+    <div class="gs-modal-body">
+      <input type="hidden" id="a-id"/>
+      <div class="fr"><div class="fg"><label>Agent Name</label><input id="a-name" placeholder="FAQ Agent"/></div><div class="fg"><label>Slug</label><input id="a-slug" placeholder="faq"/></div></div>
+      <div class="fr"><div class="fg"><label>Category</label><select id="a-category"><option value="chat">Chat</option><option value="alert">Alert</option><option value="booking">Booking</option><option value="payment">Payment</option><option value="report">Report</option><option value="system">System</option></select></div><div class="fg"><label>Model</label><select id="a-model"><option value="claude-sonnet-4-20250514">Claude Sonnet 4</option><option value="claude-opus-4-20250514">Claude Opus 4</option><option value="claude-haiku-4-5-20251001">Claude Haiku 4.5</option></select></div></div>
+      <div class="fg"><label>Max Tokens</label><input id="a-tokens" type="number" value="600"/></div>
+      <div class="fg"><label>Description</label><input id="a-desc" placeholder="Answers questions about menu, hours, location"/></div>
+      <div class="fg"><label>System Prompt</label><textarea id="a-prompt" style="min-height:160px" placeholder="You are a helpful assistant for..."></textarea></div>
+    </div>
+    <div class="gs-modal-foot"><button class="btn btn-outline" onclick="closeModal('modal-agent')">Cancel</button><button class="btn btn-primary" id="agent-save-btn" onclick="saveAgent()">Add Agent</button></div>
+  </div>
+</div>
+
+<!-- WORKFLOW MODAL -->
+<div class="gs-modal-bg" id="modal-workflow">
+  <div class="gs-modal">
+    <div class="gs-modal-head"><h3>Add Workflow</h3><button class="gs-modal-close" onclick="closeModal('modal-workflow')">✕</button></div>
+    <div class="gs-modal-body">
+      <div class="fg"><label>Client</label><select id="w-client"><option value="">Select client...</option></select></div>
+      <div class="fr"><div class="fg"><label>Workflow Name</label><input id="w-name" placeholder="New Parking Request"/></div><div class="fg"><label>Trigger</label><input id="w-trigger" placeholder="parking_request"/></div></div>
+      <div class="fg"><label>Description</label><textarea id="w-desc" placeholder="What triggers this workflow and what does it do?"></textarea></div>
+      <div class="hint" style="padding:.75rem;background:#080c14;border:1px solid #1a2540;border-radius:6px;margin-top:.5rem">Workflow steps can be added after creating the workflow via the Steps builder.</div>
+    </div>
+    <div class="gs-modal-foot"><button class="btn btn-outline" onclick="closeModal('modal-workflow')">Cancel</button><button class="btn btn-primary" onclick="saveWorkflow()">Create Workflow</button></div>
+  </div>
+</div>
+
+<script>
+let SB_URL='',SB_KEY='';
+let state={clients:[],services:[],agents:[],credentials:[],workflows:[]};
+const token=localStorage.getItem('gs_token');
+if(!token){window.location.href='/';}
+
+async function init(){
+  const cfg=await fetch('/api/config',{headers:{Authorization:'Bearer '+token}}).then(r=>r.json());
+  if(cfg.error){window.location.href='/';return;}
+  SB_URL=cfg.supabase_url;SB_KEY=cfg.supabase_key;
+  loadAll();
+}
+
+const sb=(path,opts={})=>fetch(`${SB_URL}/rest/v1/${path}`,{
+  headers:{'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`,'Content-Type':'application/json','Prefer':'return=representation',...(opts.headers||{})},
+  ...opts
+}).then(r=>r.json());
+
+async function loadAll(){
+  const [clients,services,agents,creds,workflows]=await Promise.all([
+    sb('sc_clients?select=*&order=created_at'),
+    sb('sc_services?select=*&order=category'),
+    sb('sc_agents?select=*&order=category'),
+    sb('sc_credentials?select=*,sc_clients(name),sc_services(name,slug)&order=created_at'),
+    sb('sc_workflows?select=*,sc_clients(name)&order=created_at')
+  ]);
+  state={clients,services,agents,credentials:creds,workflows};
+  document.getElementById('stat-clients').textContent=clients.length;
+  document.getElementById('stat-services').textContent=services.length;
+  document.getElementById('stat-agents').textContent=agents.length;
+  document.getElementById('stat-creds').textContent=creds.length;
+  document.getElementById('stat-workflows').textContent=workflows.length;
+  renderDash();renderClients();renderServices('all');renderAgents();
+  renderCredentials('all');renderWorkflows();populateSelects();
+}
+
+const bdg=(val,cls)=>`<span class="badge badge-${cls||val}">${val}</span>`;
+
+function renderDash(){
+  document.getElementById('dash-clients').innerHTML=state.clients.map(c=>
+    `<tr><td style="font-weight:600;color:#c8d8f0">${c.name}</td><td>${bdg(c.industry)}</td><td>${bdg(c.plan)}</td></tr>`
+  ).join('')||'<tr><td colspan="3" style="text-align:center;color:#3a4a6a">No clients yet</td></tr>';
+  document.getElementById('dash-services').innerHTML=state.services.slice(0,8).map(s=>
+    `<tr><td style="color:#c8d8f0">${s.name}</td><td>${bdg(s.category)}</td><td><code style="font-size:.75rem;color:#4a5a7a">${s.auth_type}</code></td></tr>`
+  ).join('');
+}
+
+function renderClients(){
+  document.getElementById('clients-table').innerHTML=state.clients.map(c=>
+    `<tr>
+      <td style="font-weight:600;color:#c8d8f0">${c.name}</td>
+      <td style="color:#4a5a7a">${c.domain||'—'}</td>
+      <td>${bdg(c.industry)}</td>
+      <td>${bdg(c.plan)}</td>
+      <td>${bdg(c.active?'Active':'Inactive',c.active?'active':'inactive')}</td>
+      <td style="display:flex;gap:.4rem">
+        <button class="btn btn-outline btn-sm" onclick="openEditClient('${c.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteClient('${c.id}')">Delete</button>
+      </td>
+    </tr>`
+  ).join('')||'<tr><td colspan="6"><div class="gs-empty"><div class="gs-empty-icon">🏢</div>No clients yet</div></td></tr>';
+}
+
+function renderServices(filter){
+  const list=filter==='all'?state.services:state.services.filter(s=>s.category===filter);
+  document.getElementById('services-table').innerHTML=list.map(s=>
+    `<tr>
+      <td style="font-weight:600;color:#c8d8f0">${s.name}</td>
+      <td>${bdg(s.category)}</td>
+      <td><code style="font-size:.75rem;color:#4a5a7a">${s.auth_type}</code></td>
+      <td><a href="${s.base_url||'#'}" target="_blank" style="color:#4f8ef7;font-size:.78rem">${s.base_url||'—'}</a></td>
+      <td>${s.docs_url?`<a href="${s.docs_url}" target="_blank" style="color:#4f8ef7;font-size:.78rem">Docs ↗</a>`:'—'}</td>
+      <td>${bdg(s.active?'Active':'Inactive',s.active?'active':'inactive')}</td>
+    </tr>`
+  ).join('');
+}
+
+function filterSvc(cat,el){
+  document.querySelectorAll('.gs-tabs .gs-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');renderServices(cat);
+}
+
+function renderAgents(){
+  document.getElementById('agents-table').innerHTML=state.agents.map(a=>
+    `<tr>
+      <td style="font-weight:600;color:#c8d8f0">${a.name}</td>
+      <td><code style="font-size:.75rem;color:#4a5a7a">${a.slug}</code></td>
+      <td>${bdg(a.category)}</td>
+      <td style="font-size:.78rem;color:#4a5a7a">${(a.model||'').replace('claude-','')}</td>
+      <td style="color:#5a6a8a;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.description||'—'}</td>
+      <td>${bdg(a.active?'Active':'Inactive',a.active?'active':'inactive')}</td>
+      <td style="display:flex;gap:.4rem">
+        <button class="btn btn-outline btn-sm" onclick="openEditAgent('${a.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteAgent('${a.id}')">Delete</button>
+      </td>
+    </tr>`
+  ).join('');
+}
+
+function renderCredentials(filter){
+  let list=state.credentials;
+  if(filter!=='all') list=list.filter(c=>c.client_id===filter);
+  document.getElementById('creds-table').innerHTML=!list.length
+    ?'<tr><td colspan="8"><div class="gs-empty"><div class="gs-empty-icon">🔑</div>No credentials yet</div></td></tr>'
+    :list.map(c=>
+      `<tr>
+        <td style="color:#c8d8f0;font-weight:600">${c.sc_clients?.name||'—'}</td>
+        <td>${c.sc_services?.name||'—'}</td>
+        <td><code style="font-size:.78rem">${c.key_name}</code></td>
+        <td><span class="cred-mask">••••••••••••••••</span></td>
+        <td style="color:#5a6a8a;font-size:.8rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.description||'—'}</td>
+        <td>${bdg(c.environment)}</td>
+        <td>${bdg(c.active?'Active':'Inactive',c.active?'active':'inactive')}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="revokeCredential('${c.id}')">Revoke</button></td>
+      </tr>`
+    ).join('');
+  const tabs=document.getElementById('cred-client-tabs');
+  tabs.innerHTML=state.clients.map(c=>`<span class="gs-tab" onclick="filterCreds('${c.id}',this)" style="display:inline-block">${c.name}</span>`).join('');
+}
+
+function filterCreds(id,el){
+  document.querySelectorAll('#page-credentials .gs-tab').forEach(t=>t.classList.remove('active'));
+  if(el) el.classList.add('active');
+  renderCredentials(id);
+}
+
+function renderWorkflows(){
+  document.getElementById('workflows-table').innerHTML=!state.workflows.length
+    ?'<tr><td colspan="6"><div class="gs-empty"><div class="gs-empty-icon">⚡</div>No workflows yet</div></td></tr>'
+    :state.workflows.map(w=>
+      `<tr>
+        <td style="color:#c8d8f0">${w.sc_clients?.name||'—'}</td>
+        <td style="font-weight:600;color:#c8d8f0">${w.name}</td>
+        <td><code style="font-size:.78rem;color:#4a5a7a">${w.trigger}</code></td>
+        <td style="color:#5a6a8a;font-size:.82rem">${w.description||'—'}</td>
+        <td>${bdg(w.active?'Active':'Inactive',w.active?'active':'inactive')}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteWorkflow('${w.id}')">Delete</button></td>
+      </tr>`
+    ).join('');
+}
+
+function populateSelects(){
+  const cOpts='<option value="">Select client...</option>'+state.clients.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  const sOpts='<option value="">Select service...</option>'+state.services.map(s=>`<option value="${s.id}">${s.name} (${s.category})</option>`).join('');
+  document.getElementById('cr-client').innerHTML=cOpts;
+  document.getElementById('cr-service').innerHTML=sOpts;
+  document.getElementById('w-client').innerHTML=cOpts;
+}
+
+function openAddClient(){
+  document.getElementById('c-id').value='';
+  ['c-name','c-domain','c-contact','c-phone','c-email','c-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('client-modal-title').textContent='Add Client';
+  document.getElementById('client-save-btn').textContent='Add Client';
+  openModal('modal-client');
+}
+
+function openEditClient(id){
+  const c=state.clients.find(x=>x.id===id);if(!c) return;
+  document.getElementById('c-id').value=c.id;
+  document.getElementById('c-name').value=c.name||'';
+  document.getElementById('c-domain').value=c.domain||'';
+  document.getElementById('c-industry').value=c.industry||'other';
+  document.getElementById('c-plan').value=c.plan||'starter';
+  document.getElementById('c-contact').value=c.contact_name||'';
+  document.getElementById('c-phone').value=c.contact_phone||'';
+  document.getElementById('c-email').value=c.contact_email||'';
+  document.getElementById('c-notes').value=c.notes||'';
+  document.getElementById('client-modal-title').textContent='Edit Client';
+  document.getElementById('client-save-btn').textContent='Save Changes';
+  openModal('modal-client');
+}
+
+async function saveClient(){
+  const id=document.getElementById('c-id').value;
+  const b={name:document.getElementById('c-name').value,domain:document.getElementById('c-domain').value,industry:document.getElementById('c-industry').value,plan:document.getElementById('c-plan').value,contact_name:document.getElementById('c-contact').value,contact_phone:document.getElementById('c-phone').value,contact_email:document.getElementById('c-email').value,notes:document.getElementById('c-notes').value};
+  if(!b.name) return alert('Name required');
+  if(id){await sb(`sc_clients?id=eq.${id}`,{method:'PATCH',headers:{'Prefer':'return=minimal'},body:JSON.stringify(b)});}
+  else{await sb('sc_clients',{method:'POST',body:JSON.stringify(b)});}
+  closeModal('modal-client');loadAll();
+}
+
+async function deleteClient(id){
+  if(!confirm('Delete this client? This cannot be undone.')) return;
+  await sb(`sc_clients?id=eq.${id}`,{method:'DELETE',headers:{'Prefer':'return=minimal'}});
+  loadAll();
+}
+
+function openAddCred(){
+  populateSelects();
+  ['cr-name','cr-value','cr-desc'].forEach(id=>document.getElementById(id).value='');
+  openModal('modal-cred');
+}
+
+async function saveCredential(){
+  const b={client_id:document.getElementById('cr-client').value,service_id:document.getElementById('cr-service').value,key_name:document.getElementById('cr-name').value,key_value:document.getElementById('cr-value').value,description:document.getElementById('cr-desc').value,environment:document.getElementById('cr-env').value};
+  if(!b.client_id||!b.service_id||!b.key_name||!b.key_value) return alert('All fields required');
+  await sb('sc_credentials',{method:'POST',body:JSON.stringify(b)});
+  closeModal('modal-cred');loadAll();
+}
+
+async function revokeCredential(id){
+  if(!confirm('Revoke this credential?')) return;
+  await sb(`sc_credentials?id=eq.${id}`,{method:'PATCH',headers:{'Prefer':'return=minimal'},body:JSON.stringify({active:false})});
+  loadAll();
+}
+
+async function saveService(){
+  const b={name:document.getElementById('s-name').value,slug:document.getElementById('s-slug').value,category:document.getElementById('s-cat').value,auth_type:document.getElementById('s-auth').value,base_url:document.getElementById('s-url').value,docs_url:document.getElementById('s-docs').value,description:document.getElementById('s-desc').value};
+  if(!b.name||!b.slug) return alert('Name and slug required');
+  await sb('sc_services',{method:'POST',body:JSON.stringify(b)});
+  closeModal('modal-service');loadAll();
+}
+
+function openAddAgent(){
+  document.getElementById('a-id').value='';
+  ['a-name','a-slug','a-desc','a-prompt'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('a-tokens').value='600';
+  document.getElementById('agent-modal-title').textContent='Add Agent';
+  document.getElementById('agent-save-btn').textContent='Add Agent';
+  openModal('modal-agent');
+}
+
+function openEditAgent(id){
+  const a=state.agents.find(x=>x.id===id);if(!a) return;
+  document.getElementById('a-id').value=a.id;
+  document.getElementById('a-name').value=a.name||'';
+  document.getElementById('a-slug').value=a.slug||'';
+  document.getElementById('a-category').value=a.category||'chat';
+  document.getElementById('a-model').value=a.model||'claude-sonnet-4-20250514';
+  document.getElementById('a-tokens').value=a.max_tokens||600;
+  document.getElementById('a-desc').value=a.description||'';
+  document.getElementById('a-prompt').value=a.system_prompt||'';
+  document.getElementById('agent-modal-title').textContent='Edit Agent';
+  document.getElementById('agent-save-btn').textContent='Save Changes';
+  openModal('modal-agent');
+}
+
+async function saveAgent(){
+  const id=document.getElementById('a-id').value;
+  const b={name:document.getElementById('a-name').value,slug:document.getElementById('a-slug').value,category:document.getElementById('a-category').value,model:document.getElementById('a-model').value,max_tokens:parseInt(document.getElementById('a-tokens').value)||600,description:document.getElementById('a-desc').value,system_prompt:document.getElementById('a-prompt').value};
+  if(!b.name||!b.slug) return alert('Name and slug required');
+  if(id){await sb(`sc_agents?id=eq.${id}`,{method:'PATCH',headers:{'Prefer':'return=minimal'},body:JSON.stringify(b)});}
+  else{await sb('sc_agents',{method:'POST',body:JSON.stringify(b)});}
+  closeModal('modal-agent');loadAll();
+}
+
+async function deleteAgent(id){
+  if(!confirm('Delete this agent?')) return;
+  await sb(`sc_agents?id=eq.${id}`,{method:'DELETE',headers:{'Prefer':'return=minimal'}});
+  loadAll();
+}
+
+function openAddWorkflow(){
+  ['w-name','w-trigger','w-desc'].forEach(id=>document.getElementById(id).value='');
+  openModal('modal-workflow');
+}
+
+async function saveWorkflow(){
+  const b={client_id:document.getElementById('w-client').value,name:document.getElementById('w-name').value,trigger:document.getElementById('w-trigger').value,description:document.getElementById('w-desc').value};
+  if(!b.client_id||!b.name||!b.trigger) return alert('Client, name and trigger required');
+  await sb('sc_workflows',{method:'POST',body:JSON.stringify(b)});
+  closeModal('modal-workflow');loadAll();
+}
+
+async function deleteWorkflow(id){
+  if(!confirm('Delete this workflow?')) return;
+  await sb(`sc_workflows?id=eq.${id}`,{method:'DELETE',headers:{'Prefer':'return=minimal'}});
+  loadAll();
+}
+
+function showPage(id,el){
+  document.querySelectorAll('.gs-page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.gs-nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if(el) el.classList.add('active');
+}
+
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function logout(){localStorage.removeItem('gs_token');window.location.href='/';}
+
+init();
+</script>
+</body>
+</html>

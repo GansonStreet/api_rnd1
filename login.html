@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>GansonStreet Admin</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#080c14;color:#e8edf5;display:flex;align-items:center;justify-content:center;min-height:100vh}
+.card{background:#0d1420;border:1px solid #1a2540;border-radius:16px;padding:2.5rem;width:380px}
+.logo{font-size:1.4rem;font-weight:800;color:#fff;margin-bottom:.3rem}.logo span{color:#4f8ef7}
+.sub{font-size:.75rem;color:#3a4a6a;letter-spacing:2px;text-transform:uppercase;margin-bottom:2rem}
+label{font-size:.75rem;letter-spacing:1px;text-transform:uppercase;color:#4a5a7a;display:block;margin-bottom:.4rem}
+input{width:100%;background:#080c14;border:1px solid #1a2540;border-radius:6px;padding:.7rem .9rem;color:#e8edf5;font-size:.95rem;outline:none;margin-bottom:1.2rem;transition:border-color .2s}
+input:focus{border-color:#4f8ef7}
+button{width:100%;background:#4f8ef7;color:#fff;border:none;border-radius:6px;padding:.85rem;font-size:1rem;font-weight:700;cursor:pointer}
+button:hover{background:#6ba3f9}
+.err{color:#e24b4a;font-size:.82rem;margin-top:.5rem;display:none}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">Ganson<span>Street</span></div>
+  <div class="sub">Admin Console</div>
+  <label>Password</label>
+  <input type="password" id="pass" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')login()"/>
+  <button onclick="login()">Sign In</button>
+  <div class="err" id="err">Invalid password</div>
+</div>
+<script>
+async function login(){
+  const res=await fetch('/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:document.getElementById('pass').value})});
+  const d=await res.json();
+  if(d.success){localStorage.setItem('gs_token',d.token);window.location.href='/admin';}
+  else{document.getElementById('err').style.display='block';}
+}
+</script>
+</body>
+</html>
