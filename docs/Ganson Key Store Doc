@@ -1,0 +1,124 @@
+# Ganson Key Store — New Project Cheat Sheet
+
+## Admin Console
+```
+URL:      https://admin.gansonstreet.com
+Password: (your Ganson admin password)
+```
+
+---
+
+## Client Slugs
+| Project | Slug |
+|---------|------|
+| Marios Bistro & Brews | `mario` |
+| BNMC Parking | `bnmc` |
+| Ganson | `ganson` |
+
+---
+
+## Step 1 — Copy ganson.js into project root
+```js
+// ganson.js
+require('dotenv').config();
+
+const GANSON_URL    = process.env.GANSON_URL;
+const GANSON_PASS   = process.env.GANSON_PASS;
+const GANSON_CLIENT = process.env.GANSON_CLIENT;
+
+const getToken = () =>
+  Buffer.from(GANSON_PASS + ':gansonstreet').toString('base64');
+
+const getCredentials = async (client = GANSON_CLIENT, env = null) => {
+  const url = new URL(`${GANSON_URL}/api/credentials/${client}`);
+  if (env) url.searchParams.set('env', env);
+  const res = await fetch(url.toString(), {
+    headers: { Authorization: 'Bearer ' + getToken() }
+  });
+  if (!res.ok) throw new Error(`Ganson error: ${res.status} ${res.statusText}`);
+  const data = await res.json();
+  return data.credentials;
+};
+
+const getServiceCredentials = async (service, client = GANSON_CLIENT) => {
+  const res = await fetch(
+    `${GANSON_URL}/api/credentials/${client}/${service}`,
+    { headers: { Authorization: 'Bearer ' + getToken() } }
+  );
+  if (!res.ok) throw new Error(`Ganson error: ${res.status} ${res.statusText}`);
+  const data = await res.json();
+  return data.credentials;
+};
+
+module.exports = { getCredentials, getServiceCredentials };
+```
+
+---
+
+## Step 2 — Add to project .env file
+```env
+GANSON_URL=https://admin.gansonstreet.com
+GANSON_PASS=YourAdminPassword
+GANSON_CLIENT=mario
+```
+Change `GANSON_CLIENT` to match the project slug above.
+
+---
+
+## Step 3 — Install dependencies
+```bash
+npm install dotenv
+```
+
+---
+
+## Step 4 — Use in your app
+```js
+const { getCredentials, getServiceCredentials } = require('./ganson');
+
+// Load ALL keys for this client
+const creds = await getCredentials();
+
+// Use individual keys
+const anthropic = new Anthropic({ apiKey: creds.ANTHROPIC_API_KEY });
+const twilio    = require('twilio')(creds.TWILIO_SID, creds.TWILIO_TOKEN);
+
+// Load keys for one service only
+const twilioKeys = await getServiceCredentials('twilio');
+```
+
+---
+
+## Step 5 — Test the connection
+```bash
+# Quick curl test (replace PASSWORD and SLUG)
+curl -H "Authorization: Bearer $(echo -n 'PASSWORD:gansonstreet' | base64)" \
+  "https://admin.gansonstreet.com/api/credentials/SLUG"
+```
+
+---
+
+## Step 6 — Adding new keys to a client
+1. Log into **https://admin.gansonstreet.com**
+2. Find the client (mario, bnmc, ganson)
+3. Add new key/value pair
+4. Call `getCredentials()` in your app — new key is instantly available, no redeploy needed
+
+---
+
+## Droplet Quick Reference
+| Item | Value |
+|------|-------|
+| Server | DigitalOcean — ubuntu-s-1vcpu-1gb-nyc3-01 |
+| Ganson Admin Port | 3003 |
+| Ganson Admin Path | /var/www/gansonstreet-admin |
+| PM2 ID | 6 |
+| Nginx + HTTPS | ✅ |
+
+### Useful Droplet Commands
+```bash
+pm2 list                          # see all running servers
+pm2 logs 6                        # live logs for ganson admin
+pm2 restart 6                     # restart ganson admin
+cat /var/www/gansonstreet-admin/.env   # check env vars
+```
