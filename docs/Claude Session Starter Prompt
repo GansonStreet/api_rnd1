@@ -98,3 +98,6 @@ module.exports = { getCredentials, getServiceCredentials };
 | Marios Bistro & Brews | `mario` | Anthropic, Twilio, GitHub |
 | BNMC Parking | `bnmc` | Anthropic, Supabase |
 | Ganson | `ganson` | Anthropic, GitHub, Supabase |
+
+## Get ganson.js for every new project:
+curl -o ganson.js https://raw.githubusercontent.com/GansonStreet/api_rnd1/main/ganson.js
