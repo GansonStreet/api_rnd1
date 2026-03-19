@@ -1,14 +1,15 @@
 //  Drop ganson.js into your project root
-//2. Add these 3 lines to your .env:
+//. Add these 3 lines to your .env:
 
 // ganson.js — Ganson Credential Connector
 // Drop this file into any project and call getCredentials() to load your keys
 // ----------------------------------------------------------
-// SETUP: Add these to your .env file:
-//   GANSON_URL=https://yourdomain.com
-//   GANSON_PASS=your-admin-password
-//   GANSON_CLIENT=your-client-slug   (e.g. "mariobistrobrews")
+//
 // ----------------------------------------------------------
+//GANSON_URL=https://admin.gansonstreet.com
+//GANSON_PASS=YourPassword
+//GANSON_CLIENT=mario
+//Change GANSON_CLIENT to mario, bnmc, or ganson depending on which project.
 
 require('dotenv').config();
 
