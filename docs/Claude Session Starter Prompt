@@ -1,0 +1,55 @@
+I'm building a Node.js app. My API keys are stored in a central key store called Ganson.
+
+Ganson Server: https://admin.gansonstreet.com
+Client Slug: mario        ← change to: mario | bnmc | ganson
+
+Rules:
+- NEVER hardcode API keys
+- ALWAYS use getCredentials() from ganson.js to load keys
+- ALWAYS require('dotenv').config() at top of every file
+- The .env file only ever contains GANSON_URL, GANSON_PASS, GANSON_CLIENT
+
+The ganson.js connector file looks like this:
+
+require('dotenv').config();
+
+const GANSON_URL    = process.env.GANSON_URL;
+const GANSON_PASS   = process.env.GANSON_PASS;
+const GANSON_CLIENT = process.env.GANSON_CLIENT;
+
+const getToken = () =>
+  Buffer.from(GANSON_PASS + ':gansonstreet').toString('base64');
+
+const getCredentials = async (client = GANSON_CLIENT, env = null) => {
+  const url = new URL(`${GANSON_URL}/api/credentials/${client}`);
+  if (env) url.searchParams.set('env', env);
+  const res = await fetch(url.toString(), {
+    headers: { Authorization: 'Bearer ' + getToken() }
+  });
+  if (!res.ok) throw new Error(`Ganson error: ${res.status} ${res.statusText}`);
+  const data = await res.json();
+  return data.credentials;
+};
+
+const getServiceCredentials = async (service, client = GANSON_CLIENT) => {
+  const res = await fetch(
+    `${GANSON_URL}/api/credentials/${client}/${service}`,
+    { headers: { Authorization: 'Bearer ' + getToken() } }
+  );
+  if (!res.ok) throw new Error(`Ganson error: ${res.status} ${res.statusText}`);
+  const data = await res.json();
+  return data.credentials;
+};
+
+module.exports = { getCredentials, getServiceCredentials };
+
+Available credentials per client:
+
+mario:  ANTHROPIC_API_KEY, TWILIO_SID, TWILIO_TOKEN, TWILIO_FROM, GITHUB_TOKEN
+bnmc:   ANTHROPIC_API_KEY, SUPABASE_URL, SUPABASE_KEY
+ganson: ANTHROPIC_API_KEY, GITHUB_TOKEN, SUPABASE_URL, SUPABASE_KEY
+
+My .env file only contains:
+GANSON_URL=https://admin.gansonstreet.com
+GANSON_PASS=(my password)
+GANSON_CLIENT=(mario | bnmc | ganson)
