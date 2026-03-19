@@ -10,10 +10,9 @@ I'm building a Node.js app. My API keys are stored in a central key store called
 URL:      https://admin.gansonstreet.com
 Password: (your password)
 
-## My .env file contains ONLY these 3 lines — never add real API keys to .env:
+## My .env file contains ONLY these 2 lines — never add real API keys to .env:
 GANSON_URL=https://admin.gansonstreet.com
 GANSON_PASS=YourPassword
-GANSON_CLIENT=mario
 
 ## Available clients and their keys:
 - mario  → ANTHROPIC_API_KEY, TWILIO_SID, TWILIO_TOKEN, TWILIO_FROM, GITHUB_TOKEN
@@ -23,22 +22,30 @@ GANSON_CLIENT=mario
 ## Rules you must follow:
 1. NEVER hardcode any API key anywhere in the code
 2. ALWAYS place ganson.js in the project root (code below)
-3. ALWAYS call getCredentials('clientname') explicitly — do not rely on .env default
-4. ALWAYS load credentials at the TOP of the main file before anything else
+3. ALWAYS call getCredentials('clientname') explicitly — client name is always required
+4. ALWAYS wrap top-level credential loading in an async IIFE or async function
 5. ALWAYS use require('dotenv').config() at the top of every file
 
 ## How to load credentials — always do it this way:
-// At the top of your main file, before any other code
 const { getCredentials } = require('./ganson');
-const creds = await getCredentials('mario'); // ← always pass client name explicitly
 
-// Then use keys like this:
-creds.ANTHROPIC_API_KEY
-creds.TWILIO_SID
-creds.TWILIO_TOKEN
-creds.TWILIO_FROM
-creds.SUPABASE_URL
-creds.SUPABASE_KEY
+(async () => {
+  // Load ALL keys for a client
+  const creds = await getCredentials('mario');
+
+  // Then use keys like this:
+  creds.ANTHROPIC_API_KEY
+  creds.TWILIO_SID
+  creds.TWILIO_TOKEN
+  creds.TWILIO_FROM
+  creds.SUPABASE_URL
+  creds.SUPABASE_KEY
+
+  // Load keys for ONE service only (optional)
+  const twilioKeys = await getServiceCredentials('twilio', 'mario');
+
+  // rest of app goes here...
+})();
 
 ## ganson.js — place this file in every project root, never modify it:
 require('dotenv').config();
@@ -49,6 +56,7 @@ const GANSON_PASS = process.env.GANSON_PASS;
 const getToken = () =>
   Buffer.from(GANSON_PASS + ':gansonstreet').toString('base64');
 
+// Fetch ALL credentials for a client
 const getCredentials = async (client, env = null) => {
   const url = new URL(`${GANSON_URL}/api/credentials/${client}`);
   if (env) url.searchParams.set('env', env);
@@ -60,7 +68,18 @@ const getCredentials = async (client, env = null) => {
   return data.credentials;
 };
 
-module.exports = { getCredentials };
+// Fetch credentials for ONE service only
+const getServiceCredentials = async (service, client) => {
+  const res = await fetch(
+    `${GANSON_URL}/api/credentials/${client}/${service}`,
+    { headers: { Authorization: 'Bearer ' + getToken() } }
+  );
+  if (!res.ok) throw new Error(`Ganson error: ${res.status} ${res.statusText}`);
+  const data = await res.json();
+  return data.credentials;
+};
+
+module.exports = { getCredentials, getServiceCredentials };
 ```
 
 ---
